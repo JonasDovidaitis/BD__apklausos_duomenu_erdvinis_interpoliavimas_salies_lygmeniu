@@ -1,15 +1,7 @@
 import { useState } from 'react'
 import axios from 'axios'
 import './App.css'
-import {
-  Container,
-  Typography,
-  Button,
-  Input,
-  CircularProgress,
-  Box,
-  TextField,
-} from '@mui/material'
+import { Container, Typography, Box, Button, Input, Stack, TextField, Select, MenuItem, CircularProgress, Grid } from '@mui/material'
 import GeoMap from './GeoMap.jsx'
 
 function App() {
@@ -69,144 +61,131 @@ function App() {
   }
 
   return (
-    <Container maxWidth="sm" sx={{ mt: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        Upload & Run Pipeline
+    <Box sx={{ px: 4, py: 2 }}>
+      <Typography variant="h4" gutterBottom style={{alignSelf: 'center'}}>
+        Run Pipeline
       </Typography>
+      <Grid container spacing={4} alignItems="flex-start">
+        <Grid item xs={12} md={3}>
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="h6">1. Upload ZIP File</Typography>
+            <Stack spacing={2}>
+              <Input type="file" accept=".zip" onChange={handleFileChange} />
+              <Button variant="contained" onClick={async (e) => {
+                handleUpload(e)}
+                }>Upload</Button>
+              {uploadedFileName && (
+                <Typography variant="body2">
+                  📁 Uploaded: <strong>{uploadedFileName}</strong>
+                </Typography>
+              )}
+            </Stack>
+          </Box>
 
-      <Box className="section" sx={{ mb: 3 }}>
-        <Typography variant="h6">1. Upload ZIP File</Typography>
-        <Input type="file" accept=".zip" onChange={handleFileChange} />
-        <Button variant="contained" sx={{ ml: 2 }} onClick={handleUpload}>
-          Upload
-        </Button>
-        {uploadedFileName && (
-          <Typography variant="body2" sx={{ mt: 1 }}>
-            📁 Uploaded: <strong>{uploadedFileName}</strong>
-          </Typography>
-        )}
-      </Box>
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="h6">2. Config File Name</Typography>
+            <TextField
+              fullWidth
+              placeholder="e.g., depression_config.json"
+              value={configFileName}
+              onChange={(e) => setConfigFileName(e.target.value)}
+              size="small"
+            />
+          </Box>
 
-      <Box className="section" sx={{ mb: 3 }}>
-        <Typography variant="h6">2. Enter Config File Name</Typography>
-        <TextField
-          label="e.g., depression_config.json"
-          value={configFileName}
-          onChange={(e) => setConfigFileName(e.target.value)}
-          fullWidth
-          size="small"
-          sx={{ mt: 1 }}
-        />
-      </Box>
+          {loading && (
+            <Box sx={{ textAlign: 'center', mt: 2 }}>
+              <CircularProgress />
+            </Box>
+          )}
+          {!loading && message && (
+            <Typography variant="body1" sx={{ mt: 2 }} color="info">
+              {message}
+            </Typography>
+          )}
 
-      <Box className="section" sx={{ mb: 3 }}>
-        <Typography variant="h6">3. Run Pipeline</Typography>
-        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mt: 1 }}>
-          <Button
-            variant="outlined"
-            onClick={() =>
-              callBackend('extract', {
-                zip_file: uploadedFileName,
-              })
-            }
-          >
-            Extract zip
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={() =>
-              callBackend('prepare', {
-                config_file: configFileName,
-              })
-            }
-          >
-            Process data
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={() =>
-              callBackend('train', {
-                config_file: configFileName,
-              })
-            }
-          >
-            Train Models
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={() =>
-              callBackend(
-                'options',
-                {
-                  config_file: configFileName,
-                },
-                (data) => {
-                  setColumnValues(data)
-                  const initialSelections = {}
-                  for (const col in data) {
-                    initialSelections[col] = ''
-                  }
-                  setSelectedValues(initialSelections)
-                }
-              )
-            }
-          >
-            Get Column Values
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={() =>
-              callBackend('predict', {
-                config_file: configFileName,
-                values: selectedValues,
-              })
-            }
-          >
-            Predict
-          </Button>
-        </Box>
-      </Box>
-
-      {Object.keys(columnValues).length > 0 && (
-        <Box sx={{ mt: 2 }}>
-          <Typography variant="h6">Select Values</Typography>
-          {Object.entries(columnValues).map(([col, options]) => (
-            <Box key={col} sx={{ mb: 2 }}>
-              <Typography variant="body1">{col}:</Typography>
-              <select
-                value={selectedValues[col]}
-                onChange={(e) =>
-                  setSelectedValues((prev) => ({ ...prev, [col]: e.target.value }))
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="h6">3. Run Pipeline</Typography>
+            <Stack spacing={1}>
+              <Button variant="outlined" onClick={() => callBackend('extract', { zip_file: uploadedFileName })}>
+                Extract ZIP
+              </Button>
+              <Button variant="outlined" onClick={() => callBackend('prepare', { config_file: configFileName })}>
+                Process Data
+              </Button>
+              <Button variant="outlined" onClick={() => callBackend('train', { config_file: configFileName })}>
+                Train Models
+              </Button>
+              <Button
+                variant="outlined"
+                onClick={() =>
+                  callBackend('options', { config_file: configFileName }, (data) => {
+                    setColumnValues(data)
+                    const initialSelections = {}
+                    for (const col in data) initialSelections[col] = ''
+                    setSelectedValues(initialSelections)
+                  })
                 }
               >
-                <option value="">-- Select --</option>
-                {options.map((val) => (
-                  <option key={val} value={val}>
-                    {val}
-                  </option>
-                ))}
-              </select>
-            </Box>
-          ))}
-        </Box>
-      )}
+                Get Column Values
+              </Button>
+              {Object.keys(columnValues).length > 0 && (
+                <Box sx={{ mt: 2 }}>
+                  <Typography variant="h6">Select Values</Typography>
+                  <Stack spacing={2}>
+                    {Object.entries(columnValues).map(([col, options]) => (
+                      <Box key={col}>
+                        <Typography variant="body2">{col}:</Typography>
+                        <Select
+                          fullWidth
+                          size="small"
+                          value={selectedValues[col]}
+                          onChange={(e) =>
+                            setSelectedValues((prev) => ({ ...prev, [col]: e.target.value }))
+                          }
+                          sx={{
+                            fontSize: '0.85rem',
+                            '.MuiSelect-select': { padding: '6px 10px' },
+                            mt: 0.5
+                          }}
+                        >
+                          <MenuItem value="">-- Select --</MenuItem>
+                          {options.map((val) => (
+                            <MenuItem key={val} value={val}>
+                              {val}
+                            </MenuItem>
+                          ))}</Select>
+                      </Box>
+                    ))}
+                  </Stack>
+                </Box>
+              )}
+              <Button
+                variant="outlined"
+                onClick={() =>
+                  callBackend('predict', {
+                    config_file: configFileName,
+                    values: selectedValues,
+                  })
+                }
+              >
+                Predict
+              </Button>
+            </Stack>
+          </Box>
 
-      {loading && (
-        <Box sx={{ textAlign: 'center', mt: 2 }}>
-          <CircularProgress />
-        </Box>
-      )}
-      {!loading && message && (
-        <Typography variant="body1" sx={{ mt: 2 }} color="primary">
-          {message}
-        </Typography>
-      )}
+          
 
-      <Box sx={{ mt: 4 }}>
-        <GeoMap />
-      </Box>
-    </Container>
+         
+        </Grid>
+        <Grid item xs={12} md={9} style={{width: '70%', height: '60%'}}>
+          <GeoMap />
+        </Grid>
+      </Grid>
+    </Box>
   )
+
+
 }
 
 export default App

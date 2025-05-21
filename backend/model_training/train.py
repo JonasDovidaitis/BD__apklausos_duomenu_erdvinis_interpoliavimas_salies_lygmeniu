@@ -40,16 +40,16 @@ def train_models(config_file_name, input_path, processed_path, trained_models_pa
     X = survey_df[training_columns]
     y = survey_df[config[CONFIG_COLUMN_TO_PREDICT]]
 
-    # rf_result = train_random_forest(X, y, useBalanced=False)
-    # joblib.dump(rf_result['model'], f'{trained_models_path}/{config[CONFIG_SURVEY_FILE_NAME]}/{RF_MODEL_FILE_NAME}')
-    # df = pd.DataFrame([rf_result['metrics']])
-    # df.to_csv(f'{trained_models_path}/{config[CONFIG_SURVEY_FILE_NAME]}/{RF_METRICS_FILE_NAME}', index=False)
+    rf_result = train_random_forest(X, y, useBalanced=False)
+    joblib.dump(rf_result['model'], f'{trained_models_path}/{config[CONFIG_SURVEY_FILE_NAME]}/{RF_MODEL_FILE_NAME}')
+    df = pd.DataFrame([rf_result['metrics']])
+    df.to_csv(f'{trained_models_path}/{config[CONFIG_SURVEY_FILE_NAME]}/{RF_METRICS_FILE_NAME}', index=False)
 
-    # svm_result = train_support_vector_machine(X, y, useBalanced=False)
-    # joblib.dump(svm_result['model'], f'{trained_models_path}/{config[CONFIG_SURVEY_FILE_NAME]}/{SVM_MODEL_FILE_NAME}')
-    # joblib.dump(svm_result['scaler'], f'{trained_models_path}/{config[CONFIG_SURVEY_FILE_NAME]}/{SVM_SCALER_FILE_NAME}')
-    # df = pd.DataFrame([svm_result['metrics']])
-    # df.to_csv(f'{trained_models_path}/{config[CONFIG_SURVEY_FILE_NAME]}/{SVM_METRICS_FILE_NAME}', index=False)
+    svm_result = train_support_vector_machine(X, y, useBalanced=False)
+    joblib.dump(svm_result['model'], f'{trained_models_path}/{config[CONFIG_SURVEY_FILE_NAME]}/{SVM_MODEL_FILE_NAME}')
+    joblib.dump(svm_result['scaler'], f'{trained_models_path}/{config[CONFIG_SURVEY_FILE_NAME]}/{SVM_SCALER_FILE_NAME}')
+    df = pd.DataFrame([svm_result['metrics']])
+    df.to_csv(f'{trained_models_path}/{config[CONFIG_SURVEY_FILE_NAME]}/{SVM_METRICS_FILE_NAME}', index=False)
 
     gnn_result = train_graph_neural_network(config, survey_df, training_columns)
     torch.save(gnn_result['model'].state_dict(), f'{trained_models_path}/{config[CONFIG_SURVEY_FILE_NAME]}/{GNN_MODEL_FILE_NAME}')
