@@ -49,8 +49,8 @@ export default function GeoMap() {
   const [colorScale, setColorScale] = useState(null)
   const [domain, setDomain] = useState([0, 1])
   const [boundaryData, setBoundaryData] = useState(null)
-  const [boundaryKey, setBoundaryKey] = useState(1)
-  const [predictionsKey, setPredictionsKey] = useState(1)
+  const [boundaryKey, setBoundaryKey] = useState(Date.now())
+  const [predictionsKey, setPredictionsKey] = useState(Date.now())
   const mapRef = useRef(null)
 
   const handleGeojsonUpload = (e) => {
@@ -76,7 +76,7 @@ export default function GeoMap() {
       setDomain([min, max])
       setColorScale(() => newColorScale)
       setGeoData(json)
-      setPredictionsKey((key) => key * -1)
+      setPredictionsKey(Date.now())
     }
     reader.readAsText(file)
   }
@@ -98,7 +98,7 @@ export default function GeoMap() {
       })
 
       setBoundaryData(json)
-      setBoundaryKey((key) => key * -1)
+      setBoundaryKey(Date.now())
     }
     reader.readAsText(file)
   }

@@ -173,10 +173,6 @@ function App() {
               </Button>
             </Stack>
           </Box>
-
-          
-
-         
         </Grid>
         <Grid item xs={12} md={9} style={{width: '70%', height: '60%'}}>
           <GeoMap />
