@@ -1,0 +1,6 @@
+__pycache__
+backend/data/*
+!backend/data/input
+backend/data/input/*
+backend/examples/prepared_data/*
+backend/examples/prepared_zipped/*

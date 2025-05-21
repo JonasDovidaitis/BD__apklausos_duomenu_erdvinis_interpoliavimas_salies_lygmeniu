@@ -1,0 +1,58 @@
+{
+    "survey_file_name": "depression",
+    "survey_folder_name": "depression_survey",
+    "survey_encoding": "ISO-8859-13",
+    "grid_file_name": "grid.geojson",
+    "column_to_predict": "depression_category",
+    "grid_existing_columns": [
+        "ECNM_A", "ECNM_BCDE", "ECNM_F", "ECNM_G", "ECNM_H", "ECNM_IJ", "ECNM_KL", "ECNM_M", "ECNM_N", "ECNM_P", "ECNM_Q", "ECNM_RSTU",
+        "MARRG_STAT_DIVORCED", "MARRG_STAT_WIDOW", "MARRG_STAT__MARRIED", "MARRG_STAT_UNMARRIED",
+        "BCOUTRY_LTU", "NAC_LT", "BIRTH_URBAN", "BIRTH_RURAL",
+        "MIGR_SAME", "mean_age", "mean_age_firstbirth", "mean_children", "havt_children_15plius_percent"
+    ],
+    "grid_already_normalized_columns": ["mean_age", "mean_age_firstbirth", "mean_children", "havt_children_15plius_percent"],
+    "grid_id": "GRID_ID",
+    "pop_column": "POP",
+    "boundaries": [
+        { "file_name": "district.geojson", "boundary_column": "NAME" },
+        { "file_name": "municipality.geojson", "boundary_column": "NAME" },
+        { "file_name": "country.geojson", "boundary_column": "NAME" },
+        { "file_name": "elderly_municipality.geojson", "boundary_column": "NAME" }
+    ],
+    "demographic_columns": ["gender", "age", "education", "availability", "Profession"],
+    "location_columns": ["elderly_municipality", "municipality"],
+    "additional_data": [
+        {"file_name": "bus_trips_per_person.csv", "normalize": false, "location_column": "Administracinė teritorija", "grid_location_column": "municipality", "value_column": "Reikšmė" },
+        {"file_name": "bvp_per_person.csv", "normalize": false, "location_column": "Administracinė teritorija", "grid_location_column": "district", "value_column": "Reikšmė" },
+        {"file_name": "elderly_coeficient.csv", "normalize": false, "location_column": "Administracinė teritorija", "grid_location_column": "municipality", "value_column": "Reikšmė" },
+        {"file_name": "emissions.csv", "normalize": false, "location_column": "Administracinė teritorija", "grid_location_column": "municipality", "value_column": "Reikšmė" },
+        {"file_name": "forests.csv", "normalize": false, "location_column": "Administracinė teritorija", "grid_location_column": "municipality", "value_column": "Reikšmė" },
+        {"file_name": "household_income_per_person.csv", "normalize": false, "location_column": "Administracinė teritorija", "grid_location_column": "district", "value_column": "Reikšmė" },
+        {"file_name": "household_income.csv", "normalize": false, "location_column": "Administracinė teritorija", "grid_location_column": "district", "value_column": "Reikšmė" },
+        {"file_name": "salary.csv", "normalize": false, "location_column": "Administracinė teritorija", "grid_location_column": "municipality", "value_column": "Reikšmė" },
+        {"file_name": "salary_index.csv", "normalize": false, "location_column": "Administracinė teritorija", "grid_location_column": "municipality", "value_column": "Reikšmė" },
+        {"file_name": "hard_to_survive.csv", "normalize": false, "location_column": "Apskritys", "grid_location_column": "district", "value_column": "Reikšmė" },
+        {"file_name": "poverty.csv", "normalize": false, "location_column": "Apskritys", "grid_location_column": "district", "value_column": "Reikšmė" },
+        {"file_name": "avg_home_size.csv", "normalize": false, "location_column": "Administracinė teritorija", "grid_location_column": "municipality", "value_column": "Reikšmė" },
+        {"file_name": "alcohol_consumption_perc.csv", "normalize": false, "location_column": "Apskritys", "grid_location_column": "district", "value_column": "Reikšmė" },
+        {"file_name": "normal_bmi.csv", "normalize": false, "location_column": "Apskritys", "grid_location_column": "district", "value_column": "Reikšmė" },
+        {"file_name": "medicament_usage.csv", "normalize": false, "location_column": "Apskritys", "grid_location_column": "district", "value_column": "Reikšmė" },
+        {"file_name": "bvp.csv", "normalize": true, "location_column": "Apskritys", "grid_location_column": "district", "value_column": "Reikšmė" },
+        {"file_name": "laid_off.csv", "normalize": true, "location_column": "Administracinė teritorija", "grid_location_column": "municipality", "value_column": "Reikšmė" },
+        {"file_name": "new_hires.csv", "normalize": true, "location_column": "Administracinė teritorija", "grid_location_column": "municipality", "value_column": "Reikšmė" },
+        {"file_name": "being_busy.csv", "normalize": true, "location_column": "Apskritys", "grid_location_column": "district", "value_column": "Reikšmė" },
+        {"file_name": "births.csv", "normalize": true, "location_column": "Administracinė teritorija", "grid_location_column": "municipality", "value_column": "Reikšmė" },
+        {"file_name": "crimes.csv", "normalize": true, "location_column": "Administracinė teritorija", "grid_location_column": "municipality", "value_column": "Reikšmė" },
+        {"file_name": "deaths.csv", "normalize": true, "location_column": "Administracinė teritorija", "grid_location_column": "municipality", "value_column": "Reikšmė" },
+        {"file_name": "fires.csv", "normalize": true, "location_column": "Administracinė teritorija", "grid_location_column": "municipality", "value_column": "Reikšmė" }
+    ],
+    "demographic_mappings": {
+        "age": [
+            "all_00_04", "all_05_09", "all_10_14", "all_15_19", "all_20_24",
+            "all_25_29", "all_30_34", "all_35_39", "all_40_44", "all_45_49",
+            "all_50_54", "all_55_59", "all_60_64", "all_65_69", "all_70_74",
+            "all_75_79", "all_80_84", "all_85_plius"
+        ],
+        "gender": ["FEMALE", "MALE"]
+    }
+}
