@@ -54,5 +54,6 @@
             "all_75_79", "all_80_84", "all_85_plius"
         ],
         "gender": ["FEMALE", "MALE"]
-    }
+    },
+    "is_classification": true
 }

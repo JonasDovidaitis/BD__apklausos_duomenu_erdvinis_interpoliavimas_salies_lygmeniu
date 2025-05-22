@@ -14,8 +14,8 @@ def train_random_forest(X, y, useBalanced):
   )
   param_grid = { 
     'n_estimators': [100, 200, 500],
-    'min_samples_leaf': [3,4,5,6],
-    'max_depth' : [None,5,7,9]
+    'min_samples_leaf': [3, 4, 5, 6],
+    'max_depth' : [None,5, 7, 9]
   }
   optimal_params_finder = GridSearchCV(
       estimator=random_forest, 

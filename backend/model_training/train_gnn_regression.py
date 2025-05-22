@@ -3,37 +3,24 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch_geometric.nn import GATv2Conv
 from torch_geometric.data import Data
-from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.utils.class_weight import compute_class_weight
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-from sklearn.neighbors import NearestNeighbors
-from shapely import wkt
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 import numpy as np
+from shapely import wkt
+from sklearn.neighbors import NearestNeighbors
 
 from constants import CONFIG_COLUMN_TO_PREDICT, GENERATED_POINT_COLUMN
 
 torch.manual_seed(42)
 
-class FocalLoss(nn.Module):
-    def __init__(self, gamma=2.0, weight=None):
-        super().__init__()
-        self.gamma = gamma
-        self.weight = weight
-
-    def forward(self, input, target):
-        ce_loss = F.cross_entropy(input, target, weight=self.weight, reduction='none')
-        pt = torch.exp(-ce_loss)  
-        focal_loss = ((1 - pt) ** self.gamma) * ce_loss
-        return focal_loss.mean()
-
-class GNNClassifier(nn.Module):
-    def __init__(self, input_dim, hidden_dim, num_classes):
+class GNNRegressor(nn.Module):
+    def __init__(self, input_dim, hidden_dim, output_dim=1):
         super().__init__()
         self.conv1 = GATv2Conv(input_dim, hidden_dim)
         self.conv2 = GATv2Conv(hidden_dim, hidden_dim)
         self.conv3 = GATv2Conv(hidden_dim, hidden_dim)
-        self.conv4 = GATv2Conv(hidden_dim, num_classes)
+        self.conv4 = GATv2Conv(hidden_dim, output_dim)
 
     def forward(self, x, edge_index):
         x = F.dropout(x, p=0.2, training=self.training)
@@ -44,18 +31,18 @@ class GNNClassifier(nn.Module):
         x = self.conv3(x, edge_index)
         x = F.relu(x)
         x = self.conv4(x, edge_index)
-        return x
+        return x.squeeze()
 
-def train_graph_neural_network(config, survey_df, columns_to_train):
+def train_gnn_regression(config, survey_df, columns_to_train):
     X = survey_df[columns_to_train].fillna(0).values
     scaler = StandardScaler()
     X = scaler.fit_transform(X)
     X = torch.tensor(X, dtype=torch.float32)
 
-    y = torch.tensor(survey_df[config[CONFIG_COLUMN_TO_PREDICT]].values, dtype=torch.long)
+    y = torch.tensor(survey_df[config[CONFIG_COLUMN_TO_PREDICT]].values, dtype=torch.float32)
 
     train_idx, test_idx = train_test_split(
-        np.arange(len(y)), test_size=0.2, stratify=y, random_state=42
+        np.arange(len(y)), test_size=0.2, random_state=42
     )
 
     survey_df['point_geom'] = survey_df[GENERATED_POINT_COLUMN].apply(wkt.loads)
@@ -65,10 +52,8 @@ def train_graph_neural_network(config, survey_df, columns_to_train):
     edges_survey = [[i, j] for i, neighbors in enumerate(indices_survey) for j in neighbors if i != j]
     edge_index_survey = torch.tensor(edges_survey, dtype=torch.long).t().contiguous()
 
-    model = GNNClassifier(input_dim=X.shape[1], hidden_dim=128, num_classes=len(np.unique(y)))
-    weights = compute_class_weight(class_weight='balanced', classes=np.unique(y.numpy()), y=y.numpy())
-    class_weights = torch.tensor(weights, dtype=torch.float32)
-    loss_fn = FocalLoss(gamma=1.5, weight=class_weights)
+    model = GNNRegressor(input_dim=X.shape[1], hidden_dim=128, output_dim=1)
+    loss_fn = nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 
     data = Data(x=X, edge_index=edge_index_survey, y=y)
@@ -89,22 +74,19 @@ def train_graph_neural_network(config, survey_df, columns_to_train):
 
     model.eval()
     with torch.no_grad():
-        logits = model(data.x, data.edge_index)
-        y_pred = torch.argmax(logits[test_mask], dim=1)
-        y_true = data.y[test_mask]
+        preds = model(data.x, data.edge_index)[test_mask].cpu().numpy()
+        y_true = data.y[test_mask].cpu().numpy()
 
-    accuracy = accuracy_score(y_true.numpy(), y_pred.numpy())
-    precision = precision_score(y_true.numpy(), y_pred.numpy(), average='macro')
-    recall = recall_score(y_true.numpy(), y_pred.numpy(), average='macro')
-    f1 = f1_score(y_true.numpy(), y_pred.numpy(), average='macro')
+    mse = mean_squared_error(y_true, preds)
+    mae = mean_absolute_error(y_true, preds)
+    r2 = r2_score(y_true, preds)
 
     return {
         'model': model,
         'scaler': scaler,
         'metrics': {
-            'accuracy': accuracy,
-            'precision': precision,
-            'recall': recall,
-            'f1': f1
+            'mse': mse,
+            'mae': mae,
+            'r2': r2
         }
     }

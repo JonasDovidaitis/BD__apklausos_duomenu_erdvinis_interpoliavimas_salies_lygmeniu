@@ -48,3 +48,4 @@ Configuration file is needed in order for the backend to work.
 - `location_columns` - names of the columns of the survey data that contain the place of residence of the respondents (e.g. municipality).
 - `additional_data` - names of the additional data files, for each file it is necessary to specify the columns of the file to be used and whether the data in the file should be normalized.
 - `demographic_mappings` - demographic columns that do not require one-hot encoding.
+- `is_classification` - used when training models and making predictions. If set to `true`, classification models will be used, otherwise regression models will be used.

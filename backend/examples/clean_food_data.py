@@ -184,11 +184,12 @@ def clean_food_data():
         }, 
         inplace=True
     )
-    df = df[['gender', 'age', 'education', 'availability', 'municipality', 'elderly_municipality', 'eating_habit_category']]
+    df = df[['gender', 'age', 'education', 'availability', 'municipality', 'elderly_municipality', 'eating_habit_category', 'EatingHabitTotalScore']]
     df['gender'] = df['gender'].replace(gender_mapping)
     df['age'] = df['age'].apply(categorize_age)
     df['education'] = df['education'].replace(education_mapping)
     df['availability'] = df['availability'].replace(availability_mapping)
+    df['municipality'] = df['municipality'].replace(municipality_mapping)
     df['municipality'] = df['municipality'].replace(municipality_mapping)
     df['elderly_municipality'] = df['elderly_municipality'].replace(elderly_municipality_mapping)
     df['eating_habit_category'] = df['eating_habit_category'].replace(food_category_mapping)

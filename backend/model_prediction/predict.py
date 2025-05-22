@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import joblib
 import pandas as pd
@@ -8,16 +9,30 @@ import torch
 import numpy as np
 import geopandas as gpd
 from model_training.train_gnn import GNNClassifier
+from model_training.train_gnn_regression import GNNRegressor
 from sklearn.neighbors import NearestNeighbors
 from model_training.train import get_training_columns
 from model_prediction.get_options import get_options
-from constants import CONFIG_GRID_ID_COLUMN, CONFIG_COLUMN_TO_PREDICT, CONFIG_DEMOGRAPHIC_MAPPINGS, CONFIG_SURVEY_ENCODING, CONFIG_SURVEY_FILE_NAME, GNN_MODEL_FILE_NAME, GNN_SCALER_FILE_NAME, PROCESSED_GRID_FILE_NAME, PROCESSED_SURVEY_FILE_NAME, RF_MODEL_FILE_NAME, SVM_MODEL_FILE_NAME, SVM_SCALER_FILE_NAME
+from constants import CONFIG_GRID_ID_COLUMN, CONFIG_COLUMN_TO_PREDICT, CONFIG_DEMOGRAPHIC_MAPPINGS, CONFIG_IS_CLASSIFICATION, CONFIG_SURVEY_ENCODING, CONFIG_SURVEY_FILE_NAME, GNN_MODEL_FILE_NAME, GNN_SCALER_FILE_NAME, PROCESSED_GRID_FILE_NAME, PROCESSED_SURVEY_FILE_NAME, RF_MODEL_FILE_NAME, SVM_MODEL_FILE_NAME, SVM_SCALER_FILE_NAME
     
 def get_gnn_predictions(config, survey_df, valid_gdf, X, trained_models_path):
-    svm_scaler = joblib.load(f'{trained_models_path}/{config[CONFIG_SURVEY_FILE_NAME]}/{GNN_SCALER_FILE_NAME}')
-    X_scaled = svm_scaler.transform(X)
+    gnn_scaler = joblib.load(f'{trained_models_path}/{config[CONFIG_SURVEY_FILE_NAME]}/{GNN_SCALER_FILE_NAME}')
+    X_scaled = gnn_scaler.transform(X)
     gnn_model_path = f'{trained_models_path}/{config[CONFIG_SURVEY_FILE_NAME]}/{GNN_MODEL_FILE_NAME}'
-    gnn_model = GNNClassifier(input_dim=X_scaled.shape[1], hidden_dim=128, num_classes=len(survey_df[config[CONFIG_COLUMN_TO_PREDICT]].unique()))
+    isClassification = config[CONFIG_IS_CLASSIFICATION]
+    
+    if isClassification:
+        gnn_model = GNNClassifier(
+            input_dim=X_scaled.shape[1],
+            hidden_dim=128,
+            num_classes=len(survey_df[config[CONFIG_COLUMN_TO_PREDICT]].unique())
+        )
+    else:
+        gnn_model = GNNRegressor(
+            input_dim=X_scaled.shape[1],
+            hidden_dim=128,
+            output_dim=1
+        )
     gnn_model.load_state_dict(torch.load(gnn_model_path, map_location='cpu'))
     gnn_model.eval()
 
@@ -29,8 +44,11 @@ def get_gnn_predictions(config, survey_df, valid_gdf, X, trained_models_path):
 
     X_tensor = torch.tensor(X_scaled, dtype=torch.float32)
     with torch.no_grad():
-        gnn_logits = gnn_model(X_tensor, edge_index)
-        preds_gnn = torch.argmax(gnn_logits, dim=1).numpy()
+        if isClassification:
+            gnn_logits = gnn_model(X_tensor, edge_index)
+            preds_gnn = torch.argmax(gnn_logits, dim=1).numpy()
+        else:
+            preds_gnn = gnn_model(X_tensor, edge_index).numpy()
     return preds_gnn
 
 def get_columns(config, options, values):

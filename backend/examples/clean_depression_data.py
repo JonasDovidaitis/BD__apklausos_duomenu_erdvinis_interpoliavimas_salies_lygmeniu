@@ -278,7 +278,7 @@ def categorize_age(age):
 
 def clean_depression_data():
     df = pd.read_csv(f'{RAW_DATA_PATH}/surveys/depression/depression.csv', encoding='latin1')
-    df = df[['gender', 'age', 'education', 'availability', 'Profession', 'municipality', 'elderly_municipality', 'depression_category']]
+    df = df[['gender', 'age', 'education', 'availability', 'Profession', 'municipality', 'elderly_municipality', 'depression_category', 'PHQ']]
     df['gender'] = df['gender'].replace(gender_mapping)
     df['age'] = df['age'].apply(categorize_age)
     df['education'] = df['education'].replace(education_mapping)
